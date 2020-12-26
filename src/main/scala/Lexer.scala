@@ -1,5 +1,5 @@
-import Token.Token
-import Token.Symbol
+import Token.{Num, Symbol, Token}
+
 import scala.annotation.tailrec
 
 object Lexer {
@@ -20,6 +20,9 @@ object Lexer {
           if (first.isLetter) {
             val (sym, rest2) = tokenizeSymbol(str)
             tokenizeSub(rest2, acm :+ sym)
+          } else if (first.isDigit) {
+            val (num, rest2) = tokenizeNum(str)
+            tokenizeSub(rest2, acm :+ num)
           } else {
             throw new Error(
               "panic, first: " + first + "rest: " + rest + "acm: " + acm
@@ -33,6 +36,29 @@ object Lexer {
     }
     tokenizeSub(str.toList, List())
   }
+
+  def tokenizeNum(str: List[Char]): (Num, List[Char]) = {
+    @tailrec
+    def tokenizeNumSub(
+        str: List[Char],
+        acm: List[Char]
+    ): (Num, List[Char]) = {
+      str match {
+        case first :: rest =>
+          if (skip(first)) {
+            (Num(acm.mkString("").toInt), rest)
+          } else if (first.isDigit) {
+            tokenizeNumSub(rest, acm :+ first)
+          } else {
+            (Num(acm.mkString("").toInt), str)
+          }
+        case _ =>
+          (Num(acm.mkString("").toInt), str)
+      }
+    }
+    tokenizeNumSub(str, List())
+  }
+
   def tokenizeSymbol(str: List[Char]): (Symbol, List[Char]) = {
     @tailrec
     def tokenizeSymbolSub(
