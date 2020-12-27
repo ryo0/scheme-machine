@@ -117,11 +117,26 @@ object eval {
 
   def evalDefine(exp: ParenExp, env: Env): Data = {
     // (define x 1)
+    // (define (x a) a)
     val exps = exp.exps
-    val name = cadr(exps).asInstanceOf[Symbol].str
-    val value = evalExp(caddr(exps), env)
-    setValToEnv(name, value, env)
-    Data.Null
+    cadr(exps) match {
+      case name: Symbol =>
+        val value = evalExp(caddr(exps), env)
+        setValToEnv(name.str, value, env)
+        Data.Null
+      case nameAndParams: ParenExp =>
+        val name = car(nameAndParams.exps)
+        val params = cdr(nameAndParams.exps).map(p =>
+          Data.Symbol(p.asInstanceOf[AST.Symbol].str)
+        )
+        val body = cddr(exps)
+        val p = Data.Procedure(p = args => {
+          val newEnv = extendEnv(params, args, env)
+          evalProgram(Program(body), newEnv)
+        })
+        setValToEnv(name.asInstanceOf[Symbol].str, p, env)
+        Data.Null
+    }
   }
 
   def evalIf(parenExp: ParenExp, env: Env): Data = {
