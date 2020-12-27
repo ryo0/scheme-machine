@@ -8,7 +8,7 @@ class EvalTest extends FunSuite {
   def evaluate(str: String): Data = {
     val tokens = tokenize(str)
     val program = parseProgram(tokens)
-    evalProgram(program)
+    eval(program)
   }
   test("eval op") {
     assert(evaluate("(+ 1 2 3)") === Data.Num(6))
@@ -24,6 +24,11 @@ class EvalTest extends FunSuite {
     assert(evaluate("(define x 1) (+ x x)") === Data.Num(2))
     assert(
       evaluate("(define x (+ 1 1)) (define y (+ x 2)) (* x y)") === Data.Num(8)
+    )
+    assert(
+      evaluate(
+        "(define define (+ 1 1)) (define y (+ define 2)) (* define y)"
+      ) === Data.Num(8)
     )
   }
 }

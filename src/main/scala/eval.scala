@@ -17,6 +17,14 @@ object eval {
   def setValToEnv(key: String, value: Data, env: Env): Unit = {
     env(key) = value
   }
+  def extendEnv(params: List[Data.Symbol], args: List[Data], env: Env): Env = {
+    assert(params.length == args.length)
+    val len = params.length
+    for (i <- 0 to len) {
+      setValToEnv(params(i).v, args(i), env)
+    }
+    env
+  }
   def car[T](lst: List[T]): T = {
     lst.head
   }
@@ -39,8 +47,11 @@ object eval {
     car(cdr(cdr(cdr(lst))))
   }
 
-  def evalProgram(program: Program): Data = {
-    val env: Env = mutable.Map()
+  def eval(program: Program): Data = {
+    evalProgram(program, mutable.Map(): Env)
+  }
+
+  def evalProgram(program: Program, env: Env): Data = {
     program.exps
       .map(e => {
         evalExp(e, env)
@@ -67,6 +78,7 @@ object eval {
               case "true"   => Data.Bool(true)
               case "false"  => Data.Bool(false)
               case "define" => evalDefine(exp, env)
+              case "lambda" => evalLambda(exp, env)
               case _        => getValFromEnv(str, env)
             }
           case AST.Operator(op) =>
@@ -74,6 +86,20 @@ object eval {
         }
     }
   }
+  def evalLambda(exp: AST.ParenExp, env: Env): Data.Procedure = {
+    // (lambda (x) (+ x 1))
+    val exps = exp.exps
+    val params = caddr(exps)
+    val body = cdddr(exps)
+    val paramExps = params.asInstanceOf[ParenExp].exps
+    val paramSymbols =
+      paramExps.map(e => Data.Symbol(e.asInstanceOf[Symbol].str))
+    Data.Procedure(p = args => {
+      val newEnv = extendEnv(paramSymbols, args, env)
+      evalProgram(Program(body), newEnv)
+    })
+  }
+
   def evalDefine(exp: ParenExp, env: Env): Data = {
     // (define x 1)
     val exps = exp.exps
