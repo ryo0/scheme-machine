@@ -1,6 +1,6 @@
 import org.scalatest.FunSuite
-import Lexer.tokenize
 import AST._
+import Lexer.tokenize
 import Data.Data
 import Parser._
 import eval._
@@ -37,6 +37,12 @@ class EvalTest extends FunSuite {
       evaluate(
         "(define y 3) (define a (lambda (x z) (+ x y z))) (a 1 2)"
       ) === Data.Num(6)
+    )
+  }
+  test("eval quote") {
+    assert(
+      evaluate("'(1 2 3)") === Data
+        .Quote(ParenExp(List(AST.Num(1), AST.Num(2), AST.Num(3))))
     )
   }
 }

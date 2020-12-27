@@ -1,4 +1,4 @@
-import AST.Program
+import AST.{Exp, Program}
 
 object Data {
   sealed class Data
@@ -10,6 +10,6 @@ object Data {
   case class Symbol(v: String) extends Data
   case class DataList(lst: List[Data]) extends Data
   case class Procedure(p: List[Data] => Data) extends Data
-  case class Quote(data: Data) extends Data
+  case class Quote(exp: Exp) extends Data
 
 }

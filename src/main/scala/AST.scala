@@ -13,6 +13,7 @@ object AST {
   object Less extends Op
   object True extends Exp
   object False extends Exp
+  case class QuoteExp(exp: Exp) extends Exp
   case class Symbol(str: String) extends Exp
   case class Str(str: String) extends Exp
   case class Num(value: Int) extends Exp

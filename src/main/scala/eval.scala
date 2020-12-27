@@ -66,6 +66,7 @@ object eval {
         Data.Num(value)
       case ParenExp(exps) => evalParenExp(ParenExp(exps), env)
       case Symbol(str)    => getValFromEnv(str, env)
+      case QuoteExp(exps) => Data.Quote(exps)
     }
   }
   def evalParenExp(exp: ParenExp, env: Env): Data = {
@@ -86,6 +87,8 @@ object eval {
             }
           case AST.Operator(op) =>
             evalOpExp(op, rest, env)
+          case AST.QuoteExp(exps) =>
+            Data.Quote(exps)
           case _ =>
             val p = evalExp(first, env).asInstanceOf[Data.Procedure]
             apply(p, rest, env)

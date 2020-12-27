@@ -35,6 +35,9 @@ object Parser {
           case Token.Str(str)    => (AST.Str(str), rest)
           case Token.Symbol(str) => (AST.Symbol(str), rest)
           case Token.Num(value)  => (AST.Num(value), rest)
+          case Token.Quote =>
+            val (q, rest2) = parseExp(rest)
+            (AST.QuoteExp(q), rest2)
           case _ =>
             if (!first.isInstanceOf[Token.Op]) {
               throw new Error("error")
