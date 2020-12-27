@@ -49,7 +49,7 @@ object Parser {
             parseParen(rest2, acm :+ exp)
         }
       case _ =>
-        throw new Error("error " + tokens)
+        (ParenExp(acm), List())
     }
   }
 }

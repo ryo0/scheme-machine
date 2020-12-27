@@ -122,7 +122,7 @@ object Lexer {
         case first :: rest =>
           if (skip(first)) {
             (Symbol(acm.mkString("")), rest)
-          } else if (first.isLetter) {
+          } else if (isSymbolChar(first)) {
             tokenizeSymbolSub(rest, acm :+ first)
           } else {
             (Symbol(acm.mkString("")), str)
