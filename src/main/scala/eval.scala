@@ -2,31 +2,20 @@ import AST._
 import Data.Data
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 object eval {
-  type Env = Map[String, Data]
-  def evalExp(exp: Exp): Data = {
-    exp match {
-      case AST.Bool(b) => Data.Bool(b)
-      case AST.Num(value) =>
-        Data.Num(value)
-      case ParenExp(exps) => evalParenExp(ParenExp(exps))
+  type Env = mutable.Map[String, Data]
+  val map: Env = mutable.Map()
+  def getValFromEnv(key: String, env: Env): Data = {
+    val value = env.get(key)
+    value match {
+      case Some(v) => v
+      case None    => throw new Error("error env: " + env)
     }
   }
-  def evalParenExp(exp: ParenExp): Data = {
-    exp.exps match {
-      case first :: rest =>
-        first match {
-          case AST.Symbol(str) =>
-            str match {
-              case "if"    => evalIf(exp)
-              case "true"  => Data.Bool(true)
-              case "false" => Data.Bool(false)
-            }
-          case AST.Operator(op) =>
-            evalOpExp(op, rest)
-        }
-    }
+  def setValToEnv(key: String, value: Data, env: Env): Unit = {
+    env(key) = value
   }
   def car[T](lst: List[T]): T = {
     lst.head
@@ -50,15 +39,59 @@ object eval {
     car(cdr(cdr(cdr(lst))))
   }
 
-  def evalIf(parenExp: ParenExp): Data = {
+  def evalProgram(program: Program): Data = {
+    val env: Env = mutable.Map()
+    program.exps
+      .map(e => {
+        evalExp(e, env)
+      })
+      .last
+  }
+
+  def evalExp(exp: Exp, env: Env): Data = {
+    exp match {
+      case AST.Bool(b) => Data.Bool(b)
+      case AST.Num(value) =>
+        Data.Num(value)
+      case ParenExp(exps) => evalParenExp(ParenExp(exps), env)
+      case Symbol(str)    => getValFromEnv(str, env)
+    }
+  }
+  def evalParenExp(exp: ParenExp, env: Env): Data = {
+    exp.exps match {
+      case first :: rest =>
+        first match {
+          case AST.Symbol(str) =>
+            str match {
+              case "if"     => evalIf(exp, env)
+              case "true"   => Data.Bool(true)
+              case "false"  => Data.Bool(false)
+              case "define" => evalDefine(exp, env)
+              case _        => getValFromEnv(str, env)
+            }
+          case AST.Operator(op) =>
+            evalOpExp(op, rest, env)
+        }
+    }
+  }
+  def evalDefine(exp: ParenExp, env: Env): Data = {
+    // (define x 1)
+    val exps = exp.exps
+    val name = cadr(exps).asInstanceOf[Symbol].str
+    val value = evalExp(caddr(exps), env)
+    setValToEnv(name, value, env)
+    Data.Null
+  }
+
+  def evalIf(parenExp: ParenExp, env: Env): Data = {
     val exps = parenExp.exps
-    val cond = evalExp(exps.tail.head)
+    val cond = evalExp(exps.tail.head, env)
     cond match {
       case Data.Bool(b) =>
         if (b) {
-          evalExp(caddr(exps))
+          evalExp(caddr(exps), env)
         } else {
-          evalExp(cadddr(exps))
+          evalExp(cadddr(exps), env)
         }
     }
   }
@@ -76,12 +109,14 @@ object eval {
         acm
     }
   }
-  def evalOpExp(op: AST.Op, operands: List[Exp]): Data = {
+  def evalOpExp(op: AST.Op, operands: List[Exp], env: Env): Data = {
     val result = op match {
       case AST.Plus | AST.Minus | AST.Asterisk | AST.Slash | AST.Greater |
           AST.Less =>
         val operandsInt =
-          castToNum(operands.map(o => evalExp(o)), List()).map(n => n.value)
+          castToNum(operands.map(o => evalExp(o, env)), List()).map(n =>
+            n.value
+          )
         op match {
           case AST.Plus =>
             operandsInt.sum
