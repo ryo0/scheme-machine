@@ -1,4 +1,4 @@
-import Token.{Num, Symbol, Token}
+import Token.{Num, Str, Symbol, Token}
 
 import scala.annotation.tailrec
 
@@ -11,30 +11,48 @@ object Lexer {
     }
   }
   def tokenize(str: String): List[Token] = {
+    @tailrec
     def tokenizeSub(str: List[Char], acm: List[Token]): (List[Token]) = {
       str match {
         case first :: rest => {
           if (skip(first)) {
             tokenizeSub(rest, acm)
-          }
-          if (first.isLetter) {
+          } else if (first.isLetter) {
             val (sym, rest2) = tokenizeSymbol(str)
             tokenizeSub(rest2, acm :+ sym)
           } else if (first.isDigit) {
             val (num, rest2) = tokenizeNum(str)
             tokenizeSub(rest2, acm :+ num)
+          } else if (first == '"') {
+            val (strToken, rest2) = tokenizeStr(rest)
+            tokenizeSub(rest2, acm :+ strToken)
           } else {
             throw new Error(
               "panic, first: " + first + "rest: " + rest + "acm: " + acm
             )
           }
         }
-        case _ => {
+        case _ =>
           acm
-        }
       }
     }
     tokenizeSub(str.toList, List())
+  }
+
+  def tokenizeStr(str: List[Char]): (Str, List[Char]) = {
+    @tailrec
+    def tokenizeStrSub(str: List[Char], acm: List[Char]): (Str, List[Char]) = {
+      str match {
+        case first :: rest =>
+          if (first == '"') {
+            (Str(acm.mkString("")), rest)
+          } else {
+            tokenizeStrSub(rest, acm :+ first)
+          }
+        case _ => throw new Error("error" + str)
+      }
+    }
+    tokenizeStrSub(str, List())
   }
 
   def tokenizeNum(str: List[Char]): (Num, List[Char]) = {
