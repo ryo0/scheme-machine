@@ -31,4 +31,12 @@ class EvalTest extends FunSuite {
       ) === Data.Num(8)
     )
   }
+  test("eval lambda") {
+    assert(evaluate("(define a (lambda (x) (+ x 1))) (a 1)") === Data.Num(2))
+    assert(
+      evaluate(
+        "(define y 3) (define a (lambda (x z) (+ x y z))) (a 1 2)"
+      ) === Data.Num(6)
+    )
+  }
 }

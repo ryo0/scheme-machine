@@ -20,7 +20,7 @@ object eval {
   def extendEnv(params: List[Data.Symbol], args: List[Data], env: Env): Env = {
     assert(params.length == args.length)
     val len = params.length
-    for (i <- 0 to len) {
+    for (i <- 0 until len) {
       setValToEnv(params(i).v, args(i), env)
     }
     env
@@ -79,18 +79,30 @@ object eval {
               case "false"  => Data.Bool(false)
               case "define" => evalDefine(exp, env)
               case "lambda" => evalLambda(exp, env)
-              case _        => getValFromEnv(str, env)
+              case _ =>
+                val p = evalExp(first, env).asInstanceOf[Data.Procedure]
+                println(p, rest)
+                apply(p, rest, env)
             }
           case AST.Operator(op) =>
             evalOpExp(op, rest, env)
+          case _ =>
+            val p = evalExp(first, env).asInstanceOf[Data.Procedure]
+            apply(p, rest, env)
         }
     }
   }
+
+  def apply(procedure: Data.Procedure, args: List[Exp], env: Env): Data = {
+    val evaledArgs = args.map(a => evalExp(a, env))
+    procedure.p(evaledArgs)
+  }
+
   def evalLambda(exp: AST.ParenExp, env: Env): Data.Procedure = {
     // (lambda (x) (+ x 1))
     val exps = exp.exps
-    val params = caddr(exps)
-    val body = cdddr(exps)
+    val params = cadr(exps)
+    val body = cddr(exps)
     val paramExps = params.asInstanceOf[ParenExp].exps
     val paramSymbols =
       paramExps.map(e => Data.Symbol(e.asInstanceOf[Symbol].str))
