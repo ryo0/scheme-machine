@@ -13,6 +13,18 @@ object Parser {
     Token.Greater -> AST.Greater,
     Token.Less -> AST.Less
   )
+  def parseProgram(tokens: List[Token]): Program = {
+    def parseProgramSub(tokens: List[Token], acm: List[Exp]): Program = {
+      tokens match {
+        case _ :: _ =>
+          val (exp, rest) = parseExp(tokens)
+          parseProgramSub(rest, acm :+ exp)
+        case _ =>
+          Program(acm)
+      }
+    }
+    parseProgramSub(tokens, List())
+  }
   def parseExp(tokens: List[Token]): (Exp, List[Token]) = {
     tokens match {
       case first :: rest =>
