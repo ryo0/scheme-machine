@@ -1,7 +1,7 @@
 import org.scalatest.FunSuite
 import Lexer.tokenize
 import Lexer.tokenizeSymbol
-import Token.{Num, Str, Symbol}
+import Token._
 class LexerTest extends FunSuite {
   test("lexer") {
     assert(
@@ -26,6 +26,26 @@ class LexerTest extends FunSuite {
     assert(
       tokenize("define x \"100\" 100") ===
         List(Symbol("define"), Symbol("x"), Str("100"), Num(100))
+    )
+
+    assert(
+      tokenize("(define x \"100\")") ===
+        List(LParen, Symbol("define"), Symbol("x"), Str("100"), RParen)
+    )
+
+    assert(
+      tokenize("(define x (+ 10 200))") ===
+        List(
+          LParen,
+          Symbol("define"),
+          Symbol("x"),
+          LParen,
+          Plus,
+          Num(10),
+          Num(200),
+          RParen,
+          RParen
+        )
     )
   }
 }

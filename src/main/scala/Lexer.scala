@@ -1,14 +1,32 @@
-import Token.{Num, Str, Symbol, Token}
+import Token.Token
+import Token._
 
 import scala.annotation.tailrec
 
 object Lexer {
+  val symbolToTokenMap: Map[Char, Token] =
+    Map(
+      '(' -> LParen,
+      ')' -> RParen,
+      '+' -> Plus,
+      '-' -> Minus,
+      '*' -> Asterisk,
+      '/' -> Slash,
+      '\'' -> Quote,
+      '=' -> Equal,
+      '>' -> Greater,
+      '<' -> Less
+    )
   def skip(c: Char): Boolean = {
     if (c.isSpaceChar || c == '\n') {
       true
     } else {
       false
     }
+  }
+  val symbolChar = List('-', '!', '?')
+  def isSymbolChar(c: Char): Boolean = {
+    c.isLetter || c.isDigit || symbolChar.contains(c)
   }
   def tokenize(str: String): List[Token] = {
     @tailrec
@@ -26,6 +44,9 @@ object Lexer {
           } else if (first == '"') {
             val (strToken, rest2) = tokenizeStr(rest)
             tokenizeSub(rest2, acm :+ strToken)
+          } else if (symbolToTokenMap.contains(first)) {
+            val token = symbolToTokenMap(first)
+            tokenizeSub(rest, acm :+ token)
           } else {
             throw new Error(
               "panic, first: " + first + "rest: " + rest + "acm: " + acm

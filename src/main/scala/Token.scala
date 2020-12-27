@@ -8,6 +8,10 @@ object Token {
   object False extends Token
   object LParen extends Token
   object RParen extends Token
+  object Quote extends Token
+  object Equal extends Token
+  object Greater extends Token
+  object Less extends Token
 
   sealed class Op extends Token
   object Plus extends Op
