@@ -16,4 +16,8 @@ class EvalTest extends FunSuite {
     assert(evaluate("(- 1 2 3)") === Data.Num(-4))
     assert(evaluate("(/ 12 2 3)") === Data.Num(2))
   }
+  test("eval if") {
+    assert(evaluate("(if #t 1 0)") === Data.Num(1))
+    assert(evaluate("(if #f 1 0)") === Data.Num(0))
+  }
 }

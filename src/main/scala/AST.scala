@@ -2,7 +2,8 @@ object AST {
   case class Program(exps: List[Exp])
   sealed class Exp
   case class ParenExp(exps: List[Exp]) extends Exp
-  sealed class Op extends Exp
+  sealed class Op
+  case class Operator(op: Op) extends Exp
   object Plus extends Op
   object Minus extends Op
   object Asterisk extends Op

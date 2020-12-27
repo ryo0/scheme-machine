@@ -15,7 +15,7 @@ class ParseTest extends FunSuite {
           List(
             Symbol("define"),
             Symbol("x"),
-            ParenExp(List(Plus, Num(1), Num(1)))
+            ParenExp(List(Operator(Plus), Num(1), Num(1)))
           )
         )
     )
@@ -32,7 +32,7 @@ class ParseTest extends FunSuite {
                 Num(0),
                 ParenExp(
                   List(
-                    Plus,
+                    Operator(Plus),
                     Num(1),
                     ParenExp(
                       List(

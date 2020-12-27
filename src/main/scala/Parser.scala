@@ -30,8 +30,8 @@ object Parser {
       case first :: rest =>
         first match {
           case LParen            => parseParen(rest, List())
-          case Token.True        => (AST.True, rest)
-          case Token.False       => (AST.False, rest)
+          case Token.True        => (Bool(true), rest)
+          case Token.False       => (Bool(false), rest)
           case Token.Str(str)    => (AST.Str(str), rest)
           case Token.Symbol(str) => (AST.Symbol(str), rest)
           case Token.Num(value)  => (AST.Num(value), rest)
@@ -40,7 +40,7 @@ object Parser {
               throw new Error("error")
             }
             val op = opMap(first)
-            (op, rest)
+            (AST.Operator(op), rest)
         }
     }
   }
