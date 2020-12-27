@@ -47,5 +47,10 @@ class LexerTest extends FunSuite {
           RParen
         )
     )
+
+    assert(
+      tokenize("(define x #t #f)") ===
+        List(LParen, Symbol("define"), Symbol("x"), True, False, RParen)
+    )
   }
 }

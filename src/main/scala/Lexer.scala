@@ -47,6 +47,20 @@ object Lexer {
           } else if (symbolToTokenMap.contains(first)) {
             val token = symbolToTokenMap(first)
             tokenizeSub(rest, acm :+ token)
+          } else if (first == '#') {
+            if (rest.nonEmpty) {
+              val second = rest.head
+              val b = if (second == 't') {
+                True
+              } else if (second == 'f') {
+                False
+              } else {
+                throw new Error("error" + second)
+              }
+              tokenizeSub(rest.tail, acm :+ b)
+            } else {
+              throw new Error("error" + first)
+            }
           } else {
             throw new Error(
               "panic, first: " + first + "rest: " + rest + "acm: " + acm
