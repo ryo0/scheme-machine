@@ -22,21 +22,37 @@ object eval {
         }
     }
   }
+  def castToNum(data: List[Data], acm: List[Data.Num]): List[Data.Num] = {
+    data match {
+      case first :: rest =>
+        first match {
+          case num: Data.Num =>
+            castToNum(rest, acm :+ num)
+          case _ =>
+            throw new Error("cast 失敗、演算の引数が整数でない" + data)
+        }
+      case _ =>
+        acm
+    }
+  }
   def evalOpExp(op: AST.Op, operands: List[Data]): Data = {
     val result = op match {
-      case AST.Plus =>
-        operands.map(d => d.asInstanceOf[Data.Num].value).sum
-      case AST.Minus =>
-        val operandInts = operands.map(d => d.asInstanceOf[Data.Num].value)
-        operandInts.tail.foldRight(operandInts.head) { (a, b) =>
-          b - a
-        }
-      case AST.Asterisk =>
-        operands.map(d => d.asInstanceOf[Data.Num].value).product
-      case AST.Slash =>
-        val operandInts = operands.map(d => d.asInstanceOf[Data.Num].value)
-        operandInts.tail.foldRight(operandInts.head) { (a, b) =>
-          b / a
+      case AST.Plus | AST.Minus | AST.Asterisk | AST.Slash | AST.Greater |
+          AST.Less =>
+        val operandsInt = castToNum(operands, List()).map(n => n.value)
+        op match {
+          case AST.Plus =>
+            operandsInt.sum
+          case AST.Minus =>
+            operandsInt.tail.foldRight(operandsInt.head) { (a, b) =>
+              b - a
+            }
+          case AST.Asterisk =>
+            operandsInt.product
+          case AST.Slash =>
+            operandsInt.tail.foldRight(operandsInt.head) { (a, b) =>
+              b / a
+            }
         }
     }
     Data.Num(result)
