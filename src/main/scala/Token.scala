@@ -1,7 +1,7 @@
 object Token {
   sealed class Token
 
-  case class Num(value: Float) extends Token
+  case class Num(value: Int) extends Token
   case class Str(value: String) extends Token
   case class Symbol(value: String) extends Token
   object True extends Token
