@@ -44,5 +44,9 @@ class EvalTest extends FunSuite {
       evaluate("'(1 2 3)") === Data
         .Quote(ParenExp(List(AST.Num(1), AST.Num(2), AST.Num(3))))
     )
+    assert(
+      evaluate("(quote 1 2 3)") === Data
+        .Quote(ParenExp(List(AST.Num(1), AST.Num(2), AST.Num(3))))
+    )
   }
 }

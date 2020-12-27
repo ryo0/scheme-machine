@@ -27,6 +27,9 @@ object Parser {
   }
   def parseExp(tokens: List[Token]): (Exp, List[Token]) = {
     tokens match {
+      case LParen :: Token.Symbol("quote") :: rest =>
+        val (exp, rest2) = parseParen(rest, List())
+        (QuoteExp(exp), rest2)
       case first :: rest =>
         first match {
           case LParen            => parseParen(rest, List())
